@@ -117,7 +117,8 @@
 # STATIC_URL = "static/"
 
 
-
+import dj_database_url
+import os
 from pathlib import Path
 from decouple import config
 
@@ -233,3 +234,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# Production settings
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+# Override database with Railway's URL in production
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
+
