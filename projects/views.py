@@ -141,3 +141,59 @@ def login_view(request):
         {'error': 'Invalid username or password'},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_view(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+
+    if not username or not password or not email:
+        return Response(
+            {'error': 'Username, email and password are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if User.objects.filter(username=username).exists():
+        return Response(
+            {'error': 'Username already taken'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {'error': 'Email already registered'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
+    token, created = Token.objects.get_or_create(user=user)
+    return Response({
+        'token': token.key,
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        }
+    }, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def create_admin(request):
+    from django.contrib.auth.models import User
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@hitech.com', 'admin1234')
+        return Response({'message': 'Admin created successfully'})
+    return Response({'message': 'Admin already exists'})
