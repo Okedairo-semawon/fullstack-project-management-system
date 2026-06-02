@@ -128,7 +128,11 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://fullstack-project-management-system-qn67.onrender.com',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
