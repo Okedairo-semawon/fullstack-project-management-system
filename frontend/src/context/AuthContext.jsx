@@ -4,6 +4,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
@@ -31,7 +33,7 @@ export const AuthProvider = ({children}) => {
 
     const register = async (userData) => {
         const response = await axios.post(
-          'http://localhost:8000/api/auth/register/',
+          `${BASE_URL}/auth/register/`,
           userData
         );
         const { token, user } = response.data;
