@@ -20,86 +20,113 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Project.objects.all().order_by('-created_at')
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = Project.objects.all().order_by('-created_at')
+        else:
+            queryset = Project.objects.filter(
+                manager=self.request.user
+            ).order_by('-created_at')
+
         status = self.request.query_params.get('status')
         priority = self.request.query_params.get('priority')
         search = self.request.query_params.get('search')
 
         if status:
             queryset = queryset.filter(status=status)
+
         if priority:
             queryset = queryset.filter(priority=priority)
+
         if search:
             queryset = queryset.filter(name__icontains=search)
-        return queryset             
+
+        return queryset
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == "list":
             return ProjectListSerializer
         return ProjectSerializer
+
     def perform_create(self, serializer):
         serializer.save(manager=self.request.user)
 
-    @action(detail=True, methods=['get'], url_path='stats', url_name='stats') 
+    @action(detail=True, methods=["get"], url_path="stats", url_name="stats")
     def stats(self, request, pk=None):
         project = self.get_object()
         tasks = project.tasks.all()
+
         return Response({
-            'total_tasks': tasks.count(),
-            'todo': tasks.filter(status='todo').count(),
-            'in_progress': tasks.filter(status='in_progress').count(),
-            'done': tasks.filter(status='done').count(),
-            'completion_percentage': project.completion_percentage,
-            'budget': project.budget,
-            'spent': project.spent,
-            'budget_remaining': project.budget_remaining,
-            'total_milestones': project.milestones.count(),
-            'completed_milestones': project.milestones.filter(is_completed=True).count(),
+            "total_tasks": tasks.count(),
+            "todo": tasks.filter(status="todo").count(),
+            "in_progress": tasks.filter(status="in_progress").count(),
+            "done": tasks.filter(status="done").count(),
+            "completion_percentage": project.completion_percentage,
+            "budget": project.budget,
+            "spent": project.spent,
+            "budget_remaining": project.budget_remaining,
+            "total_milestones": project.milestones.count(),
+            "completed_milestones": project.milestones.filter(
+                is_completed=True
+            ).count(),
         })
-        
       
     
 class TaskViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Task.objects.all().order_by('-created_at')
-        project_id = self.request.query_params.get('project_id')
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = Task.objects.all().order_by('-created_at')
+        else:
+            queryset = Task.objects.filter(
+                project__manager=self.request.user
+            ).order_by('-created_at')
+        project_id = self.request.query_params.get('project')
         status = self.request.query_params.get('status')
         priority = self.request.query_params.get('priority')
-
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         if status:
             queryset = queryset.filter(status=status)
         if priority:
-            queryset = queryset.filter(priority=priority)   
+            queryset = queryset.filter(priority=priority)
         return queryset
+    
 
 class MilestoneViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = MilestoneSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Milestone.objects.all().order_by('due_date')
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = Milestone.objects.all().order_by('due_date')
+        else:
+            queryset = Milestone.objects.filter(
+                project__manager=self.request.user
+            ).order_by('due_date')
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)
-        return queryset             
+        return queryset
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = DocumentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Document.objects.all().order_by('-uploaded_at')
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = Document.objects.all().order_by('-uploaded_at')
+        else:
+            queryset = Document.objects.filter(
+                project__manager=self.request.user
+            ).order_by('-uploaded_at')
         project_id = self.request.query_params.get('project')
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         return queryset
-    
+
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
 
