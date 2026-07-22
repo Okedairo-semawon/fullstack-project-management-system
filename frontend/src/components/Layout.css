@@ -10,3 +10,12 @@
   background: #f0f2f5;
   min-height: 100vh;
 }
+
+@media (max-width: 768px) {
+  .layout-main {
+    margin-left: 0;
+    padding: 76px 12px 24px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

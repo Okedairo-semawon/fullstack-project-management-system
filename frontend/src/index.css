@@ -175,7 +175,11 @@ input, select, textarea {
 @media (max-width: 480px) {
 
   .dashboard-stats {
-    grid-template-columns: 1fr;
+    /* grid-template-columns: 1fr; */
+    grid-template-columns: repeat(2, 1fr);
+    width: 360px;
+    justify-self: center;
+     align-self: center;
   }
 
   .detail-stats {
@@ -198,5 +202,17 @@ input, select, textarea {
 
   .detail-title {
     font-size: 20px;
+  }
+
+  .chart-card {
+    width: 350px;
+    justify-content: center;
+  }
+
+  .dashboard-recent {
+    width: 360px;
+  }
+  .dashboard-charts {
+    justify-content: center;
   }
 }
