@@ -315,6 +315,16 @@
   .dashboard-title {
     font-size: 22px;
   }
+
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .chart-card {
+    width: 100%;
+    max-width: 500px;
+  }
 }
 /* 
 @media (max-width: 480px) {
